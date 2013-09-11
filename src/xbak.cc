@@ -41,6 +41,7 @@ int main(int argc, char **argv)
         {
             Directories::GetInstance()->SetResourcePath(std::string(argv[1]));
         }
+        Directories::GetInstance()->Initialize();
         GameApplication::GetInstance()->Run();
         GameApplication::CleanUp();
         Directories::CleanUp();
