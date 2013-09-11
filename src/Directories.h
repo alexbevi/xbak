@@ -37,6 +37,7 @@ private:
     std::string dataPath;
     static Directories *instance;
     void CreatePath ( const std::string& path );
+    void VerifyPath ( const std::string& path ) const;
     std::string SearchResources() const;
 protected:
     Directories();
@@ -44,6 +45,7 @@ public:
     ~Directories();
     static Directories* GetInstance();
     static void CleanUp();
+    void Initialize();
     std::string GetResourcePath() const;
     std::string GetSharedPath() const;
     std::string GetUserPath() const;

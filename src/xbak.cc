@@ -35,14 +35,15 @@
 
 int main(int argc, char **argv)
 {
-    if (argc > 1)
-    {
-        Directories::GetInstance()->SetResourcePath(std::string(argv[1]));
-    }
     try
     {
+        if (argc > 1)
+        {
+            Directories::GetInstance()->SetResourcePath(std::string(argv[1]));
+        }
         GameApplication::GetInstance()->Run();
         GameApplication::CleanUp();
+        Directories::CleanUp();
     }
     catch (Exception &e)
     {
@@ -53,7 +54,6 @@ int main(int argc, char **argv)
         /* every exception should have been handled before */
         std::cerr << "Unhandled exception" << std::endl;
     }
-    Directories::CleanUp();
     return 0;
 }
 

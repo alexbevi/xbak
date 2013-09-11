@@ -33,37 +33,13 @@
 Directories* Directories::instance = 0;
 
 Directories::Directories()
-        : resourcePath("")
-        , sharedPath("")
-        , userPath("")
-        , gamesPath("")
-        , capturePath("")
-        , dataPath("")
+        : resourcePath()
+        , sharedPath()
+        , userPath()
+        , gamesPath()
+        , capturePath()
+        , dataPath()
 {
-    resourcePath = SearchResources();
-#if defined(DATADIR) && defined(PACKAGE)
-    sharedPath = std::string(DATADIR) + std::string(PACKAGE) + "/";
-#else
-    sharedPath = "";
-#endif
-#if defined(WIN32) || defined(__MACOS__) || defined(__MACOSX__) || defined(__APPLE__) || defined(__APPLE_CC__)
-    userPath = "";
-    gamesPath = "";
-    capturePath = "";
-    dataPath = "";
-#else
-    userPath = std::string(getenv("HOME")) + "/";
-#if defined(PACKAGE)
-    userPath += "." + std::string(PACKAGE) + "/";
-#endif
-    gamesPath = userPath + "/games/";
-    capturePath = userPath + "/capture/";
-    dataPath = userPath + "/data/";
-#endif
-    CreatePath(userPath);
-    CreatePath(gamesPath);
-    CreatePath(capturePath);
-    CreatePath(dataPath);
 }
 
 Directories::~Directories()
@@ -87,6 +63,42 @@ Directories::CleanUp()
         delete instance;
         instance = 0;
     }
+}
+
+void
+Directories::Initialize()
+{
+    if (resourcePath.empty())
+    {
+        resourcePath = SearchResources();
+    }
+    else
+    {
+
+    }
+#if defined(DATADIR) && defined(PACKAGE)
+    sharedPath = std::string(DATADIR) + std::string(PACKAGE) + "/";
+#else
+    sharedPath = "";
+#endif
+#if defined(WIN32) || defined(__MACOS__) || defined(__MACOSX__) || defined(__APPLE__) || defined(__APPLE_CC__)
+    userPath = "";
+    gamesPath = "";
+    capturePath = "";
+    dataPath = "";
+#else
+    userPath = std::string(getenv("HOME")) + "/";
+#if defined(PACKAGE)
+    userPath += "." + std::string(PACKAGE) + "/";
+#endif
+    gamesPath = userPath + "/games/";
+    capturePath = userPath + "/capture/";
+    dataPath = userPath + "/data/";
+#endif
+    CreatePath(userPath);
+    CreatePath(gamesPath);
+    CreatePath(capturePath);
+    CreatePath(dataPath);
 }
 
 void
@@ -130,6 +142,25 @@ const std::string SEARCH_RESOURCE_PATH[] =
         ""
     };
 
+void
+Directories::VerifyPath(const std::string &path) const
+{
+    std::string filename = path + SEARCH_RESOURCE_FILE;
+    try
+    {
+        std::ifstream ifs;
+        ifs.open(filename.c_str(), std::ios::in | std::ios::binary);
+        if (ifs.is_open())
+        {
+            ifs.close();
+        }
+    }
+    catch (...)
+    {
+        throw FileNotFound(__FILE__, __LINE__, filename);
+    }
+}
+
 std::string
 Directories::SearchResources() const
 {
@@ -139,14 +170,8 @@ Directories::SearchResources() const
         try
         {
             std::string path = SEARCH_RESOURCE_PATH[i];
-            std::string filename = path + SEARCH_RESOURCE_FILE;
-            std::ifstream ifs;
-            ifs.open(filename.c_str(), std::ios::in | std::ios::binary);
-            if (ifs.is_open())
-            {
-                ifs.close();
-                return path;
-            }
+            VerifyPath(path);
+            return path;
         }
         catch (...)
         {
